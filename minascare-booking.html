@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book an Appointment | Mina's Care Salon</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #2A7A3B;
+    --green-dark: #1E5C2B;
+    --green-light: #EBF5EC;
+    --black: #111111;
+    --grey: #6B6B6B;
+    --border: #E0E0E0;
+    --white: #FFFFFF;
+    --cream: #FAFAFA;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--white); font-family: 'Inter', sans-serif; color: var(--black); min-height: 100vh; font-size: 15px; }
+
+  .header { border-bottom: 1px solid var(--border); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; background: var(--white); z-index: 100; }
+  .logo { font-family: 'Caveat', cursive; font-size: 1.6rem; font-weight: 600; color: var(--green); line-height: 1; }
+  .logo-sub { font-size: 0.65rem; color: var(--grey); font-weight: 400; letter-spacing: 0.03em; margin-top: 2px; }
+  .header-right { font-size: 0.75rem; color: var(--grey); }
+
+  .progress-bar { height: 3px; background: var(--border); width: 100%; }
+  .progress-fill { height: 100%; background: var(--green); transition: width 0.4s ease; }
+
+  .wrap { max-width: 560px; margin: 0 auto; padding: 32px 20px 80px; }
+
+  .screen { display: none; }
+  .screen.active { display: block; animation: up 0.35s ease both; }
+  @keyframes up { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .eyebrow { font-size: 0.72rem; color: var(--grey); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; font-weight: 500; }
+  .page-title { font-size: 1.35rem; font-weight: 600; color: var(--black); line-height: 1.3; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .page-sub { font-size: 0.88rem; color: var(--grey); line-height: 1.6; margin-bottom: 24px; font-weight: 300; }
+
+  .welcome-tag { display: inline-block; border: 1px solid var(--border); border-radius: 20px; font-size: 0.72rem; color: var(--grey); padding: 4px 12px; margin-bottom: 20px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .welcome-title { font-size: 2rem; font-weight: 600; color: var(--black); line-height: 1.2; margin-bottom: 12px; letter-spacing: -0.02em; }
+  .welcome-title span { color: var(--green); }
+  .welcome-body { font-size: 0.92rem; color: var(--grey); line-height: 1.65; margin-bottom: 28px; font-weight: 300; }
+
+  .info-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .info-card { background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .info-card .ic-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--grey); font-weight: 600; margin-bottom: 4px; }
+  .info-card .ic-val { font-size: 0.82rem; color: var(--black); font-weight: 500; line-height: 1.4; }
+
+  .choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+  .choice-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 20px 16px; text-align: center; cursor: pointer; background: var(--white); transition: all 0.18s; }
+  .choice-card:hover { border-color: var(--green); background: var(--green-light); }
+  .choice-card .cc-icon { font-size: 1.6rem; display: block; margin-bottom: 8px; }
+  .choice-card .cc-label { font-weight: 600; font-size: 0.88rem; color: var(--black); display: block; margin-bottom: 4px; }
+  .choice-card .cc-sub { font-size: 0.74rem; color: var(--grey); line-height: 1.4; }
+
+  /* LENGTH SELECTOR */
+  .length-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .length-card { border: 1.5px solid var(--border); border-radius: var(--radius); padding: 16px 14px; cursor: pointer; background: var(--white); transition: all 0.15s; }
+  .length-card:hover { border-color: var(--green); background: var(--green-light); }
+  .length-card.selected { border-color: var(--green); background: var(--green-light); }
+  .length-card .lc-name { font-size: 0.92rem; font-weight: 600; color: var(--black); margin-bottom: 4px; }
+  .length-card .lc-desc { font-size: 0.74rem; color: var(--grey); line-height: 1.4; }
+
+  /* SERVICE SELECTION WITH CHECKBOXES */
+  .service-item { display: flex; align-items: flex-start; gap: 12px; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; background: var(--white); transition: all 0.15s; margin-bottom: 8px; }
+  .service-item:hover { border-color: var(--green); background: var(--green-light); }
+  .service-item.selected { border-color: var(--green); background: var(--green-light); }
+  .service-item.skip-item { opacity: 0.7; }
+  .service-item.skip-item.selected { opacity: 1; border-color: var(--grey); background: var(--cream); }
+  .svc-box { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; background: var(--white); transition: all 0.15s; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; }
+  .service-item.selected .svc-box { background: var(--green); border-color: var(--green); }
+  .service-item.skip-item.selected .svc-box { background: var(--grey); border-color: var(--grey); }
+  .svc-text .main { font-size: 0.92rem; font-weight: 500; color: var(--black); }
+  .svc-text .sub { font-size: 0.77rem; color: var(--grey); margin-top: 2px; line-height: 1.4; }
+  .svc-text .price { font-size: 0.82rem; color: var(--green); font-weight: 600; margin-top: 3px; }
+  .svc-text .price.skip { color: var(--grey); }
+
+  /* SINGLE SELECT (radio style) */
+  .opt { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 13px 16px; cursor: pointer; background: var(--white); transition: all 0.15s; text-align: left; margin-bottom: 8px; }
+  .opt:hover { border-color: var(--green); background: var(--green-light); }
+  .opt.selected { border-color: var(--green); background: var(--green-light); }
+  .opt-circle { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; background: var(--white); transition: all 0.15s; }
+  .opt.selected .opt-circle { background: var(--green); border-color: var(--green); box-shadow: inset 0 0 0 3px var(--white); }
+  .opt-text .main { font-size: 0.92rem; font-weight: 500; color: var(--black); }
+  .opt-text .sub { font-size: 0.77rem; color: var(--grey); margin-top: 2px; line-height: 1.4; }
+  .opt-text .price { font-size: 0.82rem; color: var(--green); font-weight: 600; margin-top: 3px; }
+
+  /* ADDON */
+  .addon-card { display: flex; align-items: flex-start; gap: 12px; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; background: var(--white); transition: all 0.15s; margin-bottom: 8px; }
+  .addon-card.selected { border-color: var(--green); background: var(--green-light); }
+  .addon-box { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; background: var(--white); transition: all 0.15s; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: white; }
+  .addon-card.selected .addon-box { background: var(--green); border-color: var(--green); }
+
+  .note-box { background: var(--cream); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 var(--radius) var(--radius) 0; padding: 12px 14px; font-size: 0.82rem; color: var(--grey); line-height: 1.55; margin-bottom: 14px; }
+  .note-box strong { color: var(--black); font-weight: 600; }
+
+  .section-head { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--grey); margin: 18px 0 10px; }
+
+  .summary-box { background: var(--cream); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 16px; margin-bottom: 20px; }
+  .summary-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 12px; }
+  .summary-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .summary-row:first-child { padding-top: 0; }
+  .summary-label { font-size: 0.82rem; color: var(--grey); flex-shrink: 0; }
+  .summary-val { font-size: 0.82rem; color: var(--black); font-weight: 500; text-align: right; }
+  .summary-total { display: flex; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 2px solid var(--black); }
+  .summary-total .tl { font-size: 0.88rem; font-weight: 600; }
+  .summary-total .tv { font-size: 0.88rem; font-weight: 700; color: var(--green); }
+  .deposit-note { font-size: 0.75rem; color: var(--grey); margin-top: 8px; line-height: 1.5; }
+
+  .policy-item { display: flex; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 0.82rem; color: var(--grey); line-height: 1.5; }
+  .policy-item:last-child { border-bottom: none; }
+  .policy-dot { color: var(--green); flex-shrink: 0; }
+
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--black); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 7px; }
+  .field input, .field textarea, .field select { width: 100%; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 12px 14px; font-family: 'Inter', sans-serif; font-size: 0.92rem; color: var(--black); background: var(--white); outline: none; transition: border 0.15s; appearance: auto; }
+  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--green); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .optional { font-weight: 300; text-transform: none; font-size: 0.72rem; color: var(--grey); }
+  .datetime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .btn-green { display: block; width: 100%; background: var(--green); color: var(--white); border: none; border-radius: var(--radius); padding: 14px 20px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; margin-top: 20px; transition: background 0.15s; text-align: center; text-decoration: none; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-green:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-back { background: none; border: none; color: var(--grey); font-size: 0.82rem; cursor: pointer; padding: 0; margin-top: 20px; font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 5px; }
+  .btn-back:hover { color: var(--black); }
+  .btn-wa { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; background: #25D366; color: white; border: none; border-radius: var(--radius); padding: 14px 20px; font-family: 'Inter', sans-serif; font-size: 0.92rem; font-weight: 600; cursor: pointer; margin-top: 20px; text-decoration: none; transition: opacity 0.15s; }
+  .btn-wa:hover { opacity: 0.88; }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  .follow-label { font-size: 0.75rem; font-weight: 600; color: var(--black); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; margin-top: 24px; }
+  .follow-row { display: flex; gap: 8px; }
+  .follow-ig { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 11px; border-radius: var(--radius); background: #E1306C; color: white; font-size: 0.82rem; font-weight: 600; text-decoration: none; }
+  .follow-tt { flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px; padding: 11px; border-radius: var(--radius); background: #000; color: white; font-size: 0.82rem; font-weight: 600; text-decoration: none; }
+
+  .restart { text-align: center; margin-top: 24px; }
+  .restart button { background: none; border: none; color: var(--grey); font-size: 0.8rem; cursor: pointer; text-decoration: underline; font-family: 'Inter', sans-serif; }
+
+  @media (max-width: 400px) {
+    .welcome-title { font-size: 1.65rem; }
+    .choice-row, .length-cards, .datetime-row, .follow-row, .info-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="logo">mina's care</div>
+    <div class="logo-sub">Hair Salon, Satellite Town Lagos</div>
+  </div>
+  <div class="header-right">Bookings</div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<div class="wrap">
+
+  <!-- WELCOME -->
+  <div class="screen active" id="screen-welcome">
+    <div class="welcome-tag">Appointments only</div>
+    <h1 class="welcome-title">Book your<br><span>salon appointment</span></h1>
+    <p class="welcome-body">Mina's Care is a plant-based hair growth salon in Lagos. Every treatment we do uses our own in-house formulations, we know exactly what's in them and we stand behind every ingredient.<br><br>We've worked with clients dealing with thinning edges, breakage and slow growth. The results speak for themselves, check our page to see the journeys. When you book with us, you're not just getting a service. You're getting a team that's invested in your hair. We can help you grow your hair.</p>
+    <div class="info-row">
+      <div class="info-card">
+        <div class="ic-label">Location</div>
+        <div class="ic-val">30 Owolabi Street, Satellite Town, Lagos</div>
+      </div>
+      <div class="info-card">
+        <div class="ic-label">Hours</div>
+        <div class="ic-val">Mon–Sat 10am–6pm<br>Sun 12pm–6pm</div>
+      </div>
+    </div>
+    <p class="eyebrow" style="margin-bottom:12px;">How can we help?</p>
+    <div class="choice-row">
+      <div class="choice-card" onclick="startBooking()">
+        <span class="cc-icon">✂️</span>
+        <span class="cc-label">Book an appointment</span>
+        <span class="cc-sub">Browse services and request a slot</span>
+      </div>
+      <div class="choice-card" onclick="show('screen-help')">
+        <span class="cc-icon">💬</span>
+        <span class="cc-label">I need help choosing</span>
+        <span class="cc-sub">Chat with us on WhatsApp</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HELP -->
+  <div class="screen" id="screen-help">
+    <div class="eyebrow">Not sure what you need</div>
+    <h2 class="page-title">Let's figure it out together</h2>
+    <p class="page-sub">Every head of hair is different. Chat with us on WhatsApp and we'll recommend the right service for you.</p>
+    <a href="https://wa.me/2347052636310?text=Hi%2C%20I%27d%20like%20help%20choosing%20a%20salon%20service." class="btn-wa" target="_blank">💬 Chat with us on WhatsApp</a>
+    <button class="btn-back" onclick="show('screen-welcome');setProgress(0);">← Back</button>
+  </div>
+
+  <!-- STEP 1: HAIR LENGTH -->
+  <div class="screen" id="screen-length">
+    <div class="eyebrow">Step 1 of 6</div>
+    <h2 class="page-title">What's your hair length?</h2>
+    <p class="page-sub">Gently stretch a section of your loosened hair down your back and check where it falls. Prices for all services will be based on this. If you're not sure, pick the closest option, we will confirm with you before your appointment is finalised and again before we start your service.</p>
+    <div class="length-cards">
+      <div class="length-card" onclick="selectLength(this,'short','Short')">
+        <div class="lc-name">Short</div>
+        <div class="lc-desc">Not lower than shoulders, low to normal density</div>
+      </div>
+      <div class="length-card" onclick="selectLength(this,'medium','Medium')">
+        <div class="lc-name">Medium</div>
+        <div class="lc-desc">Between shoulder and armpit, low to normal density</div>
+      </div>
+      <div class="length-card" onclick="selectLength(this,'long','Long / Thick')">
+        <div class="lc-name">Long / Thick</div>
+        <div class="lc-desc">Past armpit OR very dense hair, even if shorter</div>
+      </div>
+      <div class="length-card" onclick="selectLength(this,'xl','Extra Long / Full')">
+        <div class="lc-name">Extra Long / Full</div>
+        <div class="lc-desc">Mid back and below, OR past armpit with very high density</div>
+      </div>
+    </div>
+    <button class="btn-green" id="btnLength" onclick="goToHairType()" disabled>Continue</button>
+    <button class="btn-back" onclick="show('screen-welcome');setProgress(0);">← Back</button>
+  </div>
+
+  <!-- STEP 2: HAIR TYPE (natural/relaxed) -->
+  <div class="screen" id="screen-hairtype">
+    <div class="eyebrow">Step 2 of 6</div>
+    <h2 class="page-title">Is your hair natural or relaxed?</h2>
+    <p class="page-sub">This tells us whether a Pre-Shampoo Treatment needs to be included with your wash service.</p>
+    <div class="opt" onclick="selectHairType(this,'natural')">
+      <div class="opt-circle"></div>
+      <div class="opt-text"><div class="main">Natural</div><div class="sub">No relaxer or chemical treatment</div></div>
+    </div>
+    <div class="opt" onclick="selectHairType(this,'relaxed')">
+      <div class="opt-circle"></div>
+      <div class="opt-text"><div class="main">Relaxed or texturized</div><div class="sub">Chemically treated hair</div></div>
+    </div>
+    <button class="btn-green" id="btnHairType" onclick="show('screen-treatment');setProgress(35);" disabled>Continue</button>
+    <button class="btn-back" onclick="show('screen-length');setProgress(10);">← Back</button>
+  </div>
+
+  <!-- STEP 3: TREATMENT -->
+  <div class="screen" id="screen-treatment">
+    <div class="eyebrow">Step 3 of 6</div>
+    <h2 class="page-title">Would you like a treatment?</h2>
+    <p class="page-sub">Select a treatment or skip if you're coming in for styling only.</p>
+    <div id="treatmentList"></div>
+    <button class="btn-green" id="btnTreatment" onclick="goToStyle()" disabled>Continue</button>
+    <button class="btn-back" onclick="show('screen-hairtype');setProgress(20);">← Back</button>
+  </div>
+
+  <!-- STEP 4: STYLE -->
+  <div class="screen" id="screen-style">
+    <div class="eyebrow">Step 4 of 6</div>
+    <h2 class="page-title">Would you like a style?</h2>
+    <p class="page-sub">Select one or more styles, or skip if you're here for treatment only.</p>
+    <div id="styleList"></div>
+    <button class="btn-green" id="btnStyle" onclick="goToAddons()" disabled>Continue</button>
+    <button class="btn-back" onclick="show('screen-treatment');setProgress(35);">← Back</button>
+  </div>
+
+  <!-- STEP 5: ADD-ONS + LOOSENING -->
+  <div class="screen" id="screen-addons">
+    <div class="eyebrow">Step 5 of 6</div>
+    <h2 class="page-title">A few more things</h2>
+    <div id="addonsContent"></div>
+    <button class="btn-green" id="btnAddons" onclick="goToDetails()">Continue</button>
+    <button class="btn-back" onclick="show('screen-style');setProgress(50);">← Back</button>
+  </div>
+
+  <!-- STEP 6: DETAILS -->
+  <div class="screen" id="screen-details">
+    <div class="eyebrow">Step 6 of 6</div>
+    <h2 class="page-title">Your details and preferred time</h2>
+    <p class="page-sub">Fill in your details and we'll confirm your appointment on WhatsApp.</p>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="detailName" placeholder="e.g. Adaeze Okafor" oninput="checkDetails()">
+    </div>
+    <div class="field">
+      <label>WhatsApp number</label>
+      <input type="tel" id="detailPhone" placeholder="e.g. 08012345678" oninput="checkDetails()">
+    </div>
+    <div class="datetime-row">
+      <div class="field">
+        <label>Preferred date</label>
+        <input type="date" id="detailDate" oninput="checkDetails()">
+      </div>
+      <div class="field">
+        <label>Preferred time</label>
+        <select id="detailTime" onchange="checkDetails()">
+          <option value="">Select</option>
+          <option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option>
+          <option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option>
+          <option>4:00 PM</option><option>5:00 PM</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Anything else we should know <span class="optional">(optional)</span></label>
+      <textarea id="detailNotes" placeholder="e.g. sensitive scalp, coming with a child..."></textarea>
+    </div>
+    <button class="btn-green" id="btnDetails" onclick="goToConfirm()" disabled>Review my booking</button>
+    <button class="btn-back" onclick="show('screen-addons');setProgress(65);">← Back</button>
+  </div>
+
+  <!-- CONFIRM -->
+  <div class="screen" id="screen-confirm">
+    <div class="eyebrow">Review your booking</div>
+    <h2 class="page-title">Does everything look right?</h2>
+    <p class="page-sub">Check your summary below then tap confirm to send your request.</p>
+    <div class="summary-box">
+      <div id="summaryRows"></div>
+      <div class="summary-total">
+        <span class="tl">Estimated total</span>
+        <span class="tv" id="sumTotal"></span>
+      </div>
+      <p class="deposit-note">A 50% deposit (<span id="sumDeposit"></span>) is required to confirm your appointment. We'll send payment details on WhatsApp.</p>
+    </div>
+    <p class="section-head">Booking policies</p>
+    <div class="policy-item"><span class="policy-dot">✓</span>A delay of more than 20 minutes will result in a ₦3,000 late fee.</div>
+    <div class="policy-item"><span class="policy-dot">✓</span>Please cancel or reschedule at least 24 hours in advance.</div>
+    <div class="policy-item"><span class="policy-dot">✓</span>No-shows without notice forfeit the deposit.</div>
+    <div class="policy-item"><span class="policy-dot">✓</span>Prices may be adjusted if your hair falls in a different category. We'll let you know before starting.</div>
+    <a id="confirmWaBtn" href="#" class="btn-wa" target="_blank">💬 Confirm on WhatsApp</a>
+    <button class="btn-back" onclick="show('screen-details');setProgress(80);">← Back</button>
+  </div>
+
+</div>
+
+<script>
+// ── PRICING ───────────────────────────────────────────────────────────────────
+
+const P = {
+  preshampoo:     { short:5000,  medium:6500,  long:8500,  xl:10000 },
+  deepMoisture:   { short:15000, medium:18000, long:20000, xl:22000 },
+  protein:        { short:15000, medium:18000, long:20000, xl:22000 },
+  scalp:          { short:16500, medium:20000, long:25000, xl:28000 },
+  cornrows10:     { short:3000,  medium:3000,  long:3000,  xl:3000  },
+  cornrowsMore:   { short:4500,  medium:4500,  long:4500,  xl:4500  },
+  tinyCornrows:   { short:7000,  medium:7000,  long:7000,  xl:7000  },
+  looseMiniTwist: { short:15000, medium:20000, long:25000, xl:28000 },
+  looseTwist:     { short:null,  medium:10000, long:12000, xl:14000 },
+  looseJumboTwist:{ short:null,  medium:null,  long:6000,  xl:8000  },
+  twist:          { short:null,  medium:8000,  long:10000, xl:12000 },
+  miniTwist:      { short:15000, medium:20000, long:25000, xl:30000 },
+  microTwist:     { short:35000, medium:40000, long:50000, xl:60000 },
+  looseMiniB:     { short:15000, medium:20000, long:30000, xl:35000 },
+  looseB:         { short:10000, medium:12000, long:15000, xl:18000 },
+  looseJumboB:    { short:null,  medium:null,  long:10000, xl:12000 },
+  braid:          { short:8000,  medium:10000, long:12000, xl:15000 },
+  miniB:          { short:15000, medium:20000, long:30000, xl:35000 },
+  microB:         { short:40000, medium:50000, long:60000, xl:70000 },
+  bead:           { short:3000,  medium:3000,  long:3000,  xl:3000  },
+  blowDry:        { short:5000,  medium:7000,  long:9000,  xl:12000 },
+  blowDryTrim:    { short:8000,  medium:10000, long:13000, xl:16000 },
+};
+
+const LOOSENING = {
+  'Cornrows/Flat twists (up to 10)':     { short:2000, medium:2000, long:3000, xl:4000  },
+  'Cornrows/Flat twists (more than 10)': { short:3500, medium:4500, long:5000, xl:5000  },
+  'Tiny Cornrows':                        { short:5000, medium:6000, long:7000, xl:8000  },
+  'Jumbo twists/loose braids':            { short:3500, medium:4500, long:5000, xl:6000  },
+  'Jumbo tight braids':                   { short:4000, medium:5000, long:6000, xl:7000  },
+  'Regular twists/loose braids':          { short:5000, medium:6000, long:7000, xl:8000  },
+  'Regular tight braids':                 { short:6000, medium:7000, long:8000, xl:10000 },
+  'Mini twists/loose braids':             { short:7000, medium:8000, long:10000,xl:12000 },
+  'Mini tight braids':                    { short:8000, medium:10000,long:12000,xl:15000 },
+  'Micro twists/loose braids':            { short:15000,medium:18000,long:20000,xl:25000 },
+  'Micro tight braids':                   { short:20000,medium:23000,long:25000,xl:30000 },
+};
+
+// ── SERVICES DEFINITION ───────────────────────────────────────────────────────
+
+const TREATMENTS = [
+  { key:'deepMoisture',   name:'Deep Moisture Treatment',      sub:'Washing, deep conditioning with steam and moisturising. 2hrs',      addons:['ayur','scalp_note'] },
+  { key:'protein',        name:'Protein Repair Treatment',     sub:'Strengthens weak or damaged hair from within. 2hrs',                addons:[] },
+  { key:'scalp',          name:'Scalp Clarifying Treatment',   sub:'Full scalp reset, clarifying wash, LED light therapy. 2hrs 30mins', addons:['scalp_note'] },
+];
+
+const STYLES = [
+  { key:'cornrows10',    name:'Cornrows (10 all back)',    sub:'',          fixed:true },
+  { key:'cornrowsMore',  name:'Cornrows (more than 10)',  sub:'',          fixed:true },
+  { key:'tinyCornrows',  name:'Tiny Cornrows',            sub:'',          fixed:true },
+  { key:'looseMiniTwist',name:'Loose Mini Twists',        sub:'4–5hrs',    fixed:false },
+  { key:'looseTwist',    name:'Loose Twists',             sub:'2–3hrs',    fixed:false },
+  { key:'looseJumboTwist',name:'Loose Jumbo Twists',      sub:'1–2hrs',    fixed:false },
+  { key:'twist',         name:'Twists',                   sub:'2–3hrs',    fixed:false },
+  { key:'miniTwist',     name:'Mini Twists',              sub:'4–5hrs',    fixed:false },
+  { key:'microTwist',    name:'Micro Twists',             sub:'8hrs',      fixed:false },
+  { key:'looseMiniB',    name:'Loose Mini Braids',        sub:'4–5hrs',    fixed:false },
+  { key:'looseB',        name:'Loose Braids',             sub:'2–3hrs',    fixed:false },
+  { key:'looseJumboB',   name:'Loose Jumbo Braids',       sub:'1–2hrs',    fixed:false },
+  { key:'braid',         name:'Braids',                   sub:'2–3hrs',    fixed:false },
+  { key:'miniB',         name:'Mini Braids',              sub:'4–5hrs',    fixed:false },
+  { key:'microB',        name:'Micro Braids',             sub:'8hrs',      fixed:false },
+  { key:'bead',          name:'Bead Installation',        sub:'1hr',       fixed:true  },
+  { key:'blowDry',       name:'Blow Dry',                 sub:'2–4hrs',    fixed:false },
+  { key:'blowDryTrim',   name:'Blow Dry and Trim',        sub:'3hrs',      fixed:false },
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+
+let S = {
+  lengthKey:'', lengthLabel:'',
+  hairType:'',
+  treatment: null,        // { key, name, price } or null
+  skipTreatment: false,
+  styles: [],             // [{ key, name, price }]
+  skipStyle: false,
+  ayur: false,
+  loosening: false,
+  looseningStyle:'', looseningPrice:0,
+  name:'', phone:'', date:'', time:'', notes:'',
+};
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+
+function fmt(n) { return '₦' + Number(n).toLocaleString(); }
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function setProgress(p) { document.getElementById('progressFill').style.width = p + '%'; }
+function price(key, lk) { return P[key] && P[key][lk] != null ? P[key][lk] : null; }
+
+// ── FLOW ──────────────────────────────────────────────────────────────────────
+
+function startBooking() { show('screen-length'); setProgress(5); }
+
+function selectLength(el, key, label) {
+  document.querySelectorAll('.length-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  S.lengthKey = key; S.lengthLabel = label;
+  document.getElementById('btnLength').disabled = false;
+}
+
+function goToHairType() { show('screen-hairtype'); setProgress(20); }
+
+function selectHairType(el, type) {
+  document.querySelectorAll('#screen-hairtype .opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  S.hairType = type;
+  document.getElementById('btnHairType').disabled = false;
+}
+
+function buildTreatmentList() {
+  const lk = S.lengthKey;
+  const el = document.getElementById('treatmentList');
+  el.innerHTML = '';
+
+  TREATMENTS.forEach(t => {
+    const p = price(t.key, lk);
+    if (!p) return;
+    const div = document.createElement('div');
+    div.className = 'service-item' + (S.treatment && S.treatment.key === t.key ? ' selected' : '');
+    div.innerHTML = `<div class="svc-box">${S.treatment && S.treatment.key === t.key ? '✓' : ''}</div><div class="svc-text"><div class="main">${t.name}</div><div class="sub">${t.sub}</div><div class="price">${fmt(p)}</div></div>`;
+    div.onclick = () => {
+      // Deselect all, remove skip
+      document.querySelectorAll('#treatmentList .service-item').forEach(i => { i.classList.remove('selected'); i.querySelector('.svc-box').textContent = ''; });
+      S.skipTreatment = false;
+      div.classList.add('selected');
+      div.querySelector('.svc-box').textContent = '✓';
+      S.treatment = { key: t.key, name: t.name, price: p, addons: t.addons };
+      document.getElementById('btnTreatment').disabled = false;
+    };
+    el.appendChild(div);
+  });
+
+  // Skip option
+  const skip = document.createElement('div');
+  skip.className = 'service-item skip-item' + (S.skipTreatment ? ' selected' : '');
+  skip.innerHTML = `<div class="svc-box" style="border-color:#ccc">${S.skipTreatment ? '✓' : ''}</div><div class="svc-text"><div class="main" style="color:var(--grey)">No treatment, styling only</div><div class="sub">Skip this step</div></div>`;
+  skip.onclick = () => {
+    document.querySelectorAll('#treatmentList .service-item').forEach(i => { i.classList.remove('selected'); i.querySelector('.svc-box').textContent = ''; });
+    S.treatment = null; S.skipTreatment = true;
+    skip.classList.add('selected');
+    skip.querySelector('.svc-box').textContent = '✓';
+    document.getElementById('btnTreatment').disabled = false;
+  };
+  el.appendChild(skip);
+  document.getElementById('btnTreatment').disabled = !(S.treatment || S.skipTreatment);
+}
+
+function goToStyle() {
+  buildStyleList();
+  show('screen-style'); setProgress(50);
+}
+
+function buildStyleList() {
+  const lk = S.lengthKey;
+  const el = document.getElementById('styleList');
+  el.innerHTML = '';
+  const selectedKeys = S.styles.map(s => s.key);
+
+  STYLES.forEach(st => {
+    const p = price(st.key, lk);
+    if (p === null) return; // not available for this length
+    const isSelected = selectedKeys.includes(st.key);
+    const div = document.createElement('div');
+    div.className = 'service-item' + (isSelected ? ' selected' : '');
+    div.innerHTML = `<div class="svc-box">${isSelected ? '✓' : ''}</div><div class="svc-text"><div class="main">${st.name}</div>${st.sub ? `<div class="sub">${st.sub}</div>` : ''}<div class="price">${fmt(p)}</div></div>`;
+    div.onclick = () => {
+      // Remove skip if active
+      document.querySelectorAll('#styleList .skip-item').forEach(i => { i.classList.remove('selected'); i.querySelector('.svc-box').textContent = ''; });
+      S.skipStyle = false;
+
+      const idx = S.styles.findIndex(s => s.key === st.key);
+      if (idx >= 0) {
+        S.styles.splice(idx, 1);
+        div.classList.remove('selected');
+        div.querySelector('.svc-box').textContent = '';
+      } else {
+        S.styles.push({ key: st.key, name: st.name, price: p });
+        div.classList.add('selected');
+        div.querySelector('.svc-box').textContent = '✓';
+      }
+      document.getElementById('btnStyle').disabled = !(S.styles.length > 0 || S.skipStyle);
+    };
+    el.appendChild(div);
+  });
+
+  // Skip option
+  const skip = document.createElement('div');
+  skip.className = 'service-item skip-item' + (S.skipStyle ? ' selected' : '');
+  skip.innerHTML = `<div class="svc-box" style="border-color:#ccc">${S.skipStyle ? '✓' : ''}</div><div class="svc-text"><div class="main" style="color:var(--grey)">No styling, treatment only</div><div class="sub">Skip this step</div></div>`;
+  skip.onclick = () => {
+    document.querySelectorAll('#styleList .service-item:not(.skip-item)').forEach(i => { i.classList.remove('selected'); i.querySelector('.svc-box').textContent = ''; });
+    S.styles = []; S.skipStyle = true;
+    skip.classList.add('selected');
+    skip.querySelector('.svc-box').textContent = '✓';
+    document.getElementById('btnStyle').disabled = false;
+  };
+  el.appendChild(skip);
+  document.getElementById('btnStyle').disabled = !(S.styles.length > 0 || S.skipStyle);
+}
+
+function goToAddons() {
+  const lk = S.lengthKey;
+  const content = document.getElementById('addonsContent');
+  content.innerHTML = '';
+  S.ayur = false;
+  S.loosening = false; S.looseningStyle = ''; S.looseningPrice = 0;
+
+  // Pre-shampoo note for natural hair treatments
+  if (S.treatment && S.hairType === 'natural') {
+    const pp = price('preshampoo', lk);
+    content.innerHTML += `<div class="note-box"><strong>Pre-Shampoo Treatment included (${fmt(pp)}).</strong> This is compulsory for all natural hair wash services. It preps your hair and protects against breakage.</div>`;
+  }
+
+  // Ayurvedic add-on for Deep Moisture only
+  if (S.treatment && S.treatment.key === 'deepMoisture') {
+    content.innerHTML += `<p class="section-head">Add-on</p>
+    <div class="addon-card" id="ayurCard" onclick="toggleAyur(this)">
+      <div class="addon-box" id="ayurBox"></div>
+      <div><div class="svc-text"><div class="main">Ayurvedic Herbal Blend</div><div class="sub">Nourishing herbs that strengthen strands, improve elasticity and reduce breakage.</div><div class="price">+₦5,000</div></div></div>
+    </div>`;
+  }
+
+  // Scalp clarifying note about herbal blend
+  if (S.treatment && S.treatment.key === 'scalp') {
+    content.innerHTML += `<div class="note-box">The Scalp Clarifying Treatment includes a deep conditioning step. The type of conditioning used depends on your hair's needs on the day. If moisture conditioning is used, you'll have the option to add the Ayurvedic Herbal Blend for ₦5,000 extra. We'll let you know before proceeding.</div>`;
+  }
+
+  // Hair loosening prompt (only if they have a style or treatment)
+  content.innerHTML += `<p class="section-head">Is your hair currently in a style?</p>
+  <p style="font-size:0.85rem;color:var(--grey);line-height:1.6;margin-bottom:12px;font-weight:300;">If you're coming in with braids, twists or any protective style, please book Hair Loosening. Please don't come in with a style if you haven't booked this.</p>
+  <div class="opt" id="looseYes" onclick="selectLoosening(true)"><div class="opt-circle"></div><div class="opt-text"><div class="main">Yes, I need Hair Loosening</div></div></div>
+  <div class="opt" id="looseNo" onclick="selectLoosening(false)"><div class="opt-circle"></div><div class="opt-text"><div class="main">No, my hair is already loose</div></div></div>
+  <div id="looseStyleSection" style="display:none;margin-top:14px;">
+    <p class="section-head">What style are you coming in with?</p>
+    <div id="looseStyleOpts"></div>
+  </div>`;
+
+  // Build loosening style options
+  const looseOpts = () => {
+    const el = document.getElementById('looseStyleOpts');
+    if (!el) return;
+    el.innerHTML = '';
+    Object.keys(LOOSENING).forEach(style => {
+      const p = LOOSENING[style][lk];
+      const div = document.createElement('div');
+      div.className = 'opt' + (S.looseningStyle === style ? ' selected' : '');
+      div.innerHTML = `<div class="opt-circle"></div><div class="opt-text"><div class="main">${style}</div><div class="price">${fmt(p)}</div></div>`;
+      div.onclick = () => {
+        document.querySelectorAll('#looseStyleOpts .opt').forEach(o => o.classList.remove('selected'));
+        div.classList.add('selected');
+        S.looseningStyle = style;
+        S.looseningPrice = p;
+        document.getElementById('btnAddons').disabled = false;
+      };
+      el.appendChild(div);
+    });
+  };
+
+  // Store loosening builder for later
+  window._buildLooseOpts = looseOpts;
+  document.getElementById('btnAddons').disabled = false;
+  show('screen-addons'); setProgress(65);
+}
+
+function toggleAyur(el) {
+  S.ayur = !S.ayur;
+  el.classList.toggle('selected');
+  document.getElementById('ayurBox').textContent = S.ayur ? '✓' : '';
+}
+
+function selectLoosening(val) {
+  document.getElementById('looseYes').classList.toggle('selected', val);
+  document.getElementById('looseNo').classList.toggle('selected', !val);
+  document.getElementById('looseYes').querySelector('.opt-circle').style.background = val ? 'var(--green)' : '';
+  document.getElementById('looseNo').querySelector('.opt-circle').style.background = !val ? 'var(--green)' : '';
+  S.loosening = val;
+  if (val) {
+    document.getElementById('looseStyleSection').style.display = 'block';
+    if (window._buildLooseOpts) window._buildLooseOpts();
+    document.getElementById('btnAddons').disabled = true; // must pick a style
+  } else {
+    document.getElementById('looseStyleSection').style.display = 'none';
+    S.looseningStyle = ''; S.looseningPrice = 0;
+    document.getElementById('btnAddons').disabled = false;
+  }
+}
+
+function goToDetails() { show('screen-details'); setProgress(80); }
+
+function checkDetails() {
+  const n = document.getElementById('detailName').value.trim();
+  const p = document.getElementById('detailPhone').value.trim();
+  const d = document.getElementById('detailDate').value;
+  const t = document.getElementById('detailTime').value;
+  document.getElementById('btnDetails').disabled = !(n && p && d && t);
+}
+
+function goToConfirm() {
+  S.name  = document.getElementById('detailName').value.trim();
+  S.phone = document.getElementById('detailPhone').value.trim();
+  S.date  = document.getElementById('detailDate').value;
+  S.time  = document.getElementById('detailTime').value;
+  S.notes = document.getElementById('detailNotes').value.trim();
+
+  const lk = S.lengthKey;
+  let total = 0;
+  let rows = '';
+
+  const addRow = (label, val, amt) => {
+    rows += `<div class="summary-row"><span class="summary-label">${label}</span><span class="summary-val">${val}${amt ? ' <span style="color:var(--green);font-weight:600">'+fmt(amt)+'</span>' : ''}</span></div>`;
+    total += amt || 0;
+  };
+
+  addRow('Hair length', S.lengthLabel);
+  addRow('Hair type', S.hairType === 'natural' ? 'Natural' : 'Relaxed/Texturized');
+
+  if (S.treatment) {
+    addRow('Treatment', S.treatment.name, S.treatment.price);
+    if (S.hairType === 'natural') {
+      const pp = price('preshampoo', lk);
+      addRow('Includes', 'Pre-Shampoo Treatment', pp);
+    }
+  } else {
+    addRow('Treatment', 'None');
+  }
+
+  if (S.styles.length > 0) {
+    S.styles.forEach((st, i) => addRow(i === 0 ? 'Style' : '', st.name, st.price));
+  } else {
+    addRow('Style', 'None');
+  }
+
+  if (S.ayur) addRow('Add-on', 'Ayurvedic Herbal Blend', 5000);
+
+  if (S.loosening && S.looseningStyle) {
+    addRow('Hair Loosening', S.looseningStyle, S.looseningPrice);
+  }
+
+  const dateStr = new Date(S.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  addRow('Date', dateStr);
+  addRow('Time', S.time);
+  addRow('Name', S.name);
+  addRow('WhatsApp', S.phone);
+
+  document.getElementById('summaryRows').innerHTML = rows;
+  document.getElementById('sumTotal').textContent = fmt(total);
+  const dep = Math.ceil(total / 2);
+  document.getElementById('sumDeposit').textContent = fmt(dep);
+
+  // Build WA message
+  let msg = `Hi, I'd like to book an appointment at Mina's Care Salon.\n\n`;
+  msg += `Name: ${S.name}\nWhatsApp: ${S.phone}\n`;
+  msg += `Hair length: ${S.lengthLabel}\nHair type: ${S.hairType === 'natural' ? 'Natural' : 'Relaxed/Texturized'}\n\n`;
+  if (S.treatment) {
+    msg += `Treatment: ${S.treatment.name} (${fmt(S.treatment.price)})\n`;
+    if (S.hairType === 'natural') msg += `Includes: Pre-Shampoo Treatment (${fmt(price('preshampoo', lk))})\n`;
+  }
+  if (S.styles.length > 0) S.styles.forEach(st => { msg += `Style: ${st.name} (${fmt(st.price)})\n`; });
+  if (S.ayur) msg += `Add-on: Ayurvedic Herbal Blend (+₦5,000)\n`;
+  if (S.loosening && S.looseningStyle) msg += `Hair Loosening: ${S.looseningStyle} (${fmt(S.looseningPrice)})\n`;
+  msg += `\nPreferred date: ${dateStr}\nPreferred time: ${S.time}\n`;
+  msg += `Estimated total: ${fmt(total)} | 50% deposit: ${fmt(dep)}\n`;
+  if (S.notes) msg += `\nAdditional info: ${S.notes}\n`;
+  msg += `\nPlease confirm my appointment and send payment details. Thank you!`;
+
+  document.getElementById('confirmWaBtn').href = `https://wa.me/2347052636310?text=${encodeURIComponent(msg)}`;
+  show('screen-confirm'); setProgress(95);
+}
+
+function restart() {
+  S = { lengthKey:'', lengthLabel:'', hairType:'', treatment:null, skipTreatment:false, styles:[], skipStyle:false, ayur:false, loosening:false, looseningStyle:'', looseningPrice:0, name:'', phone:'', date:'', time:'', notes:'' };
+  ['detailName','detailPhone','detailDate','detailNotes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('detailTime').value = '';
+  show('screen-welcome'); setProgress(0);
+}
+
+// Trigger treatment list build when screen is shown
+document.getElementById('screen-treatment').addEventListener('animationstart', buildTreatmentList);
+</script>
+</body>
+</html>
